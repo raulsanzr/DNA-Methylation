@@ -9,6 +9,7 @@
 
 # REQUIRED PACKAGES
 
+library(minfi)
 library(readxl)
 library(dplyr)
 library(ggplot2)
@@ -16,7 +17,6 @@ library(gplots)
 library(ggrepel)
 library(RColorBrewer)
 library(ggfortify)
-library(minfi)
 library(maxprobes)
 library(limma)
 library(DMRcate)
