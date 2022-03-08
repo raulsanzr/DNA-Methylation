@@ -2,7 +2,7 @@
 # Author: Raúl Sanz
 #
 # Description: Script to create plots for the differential methylation and the detected DMRs in a specified range of the genome with Gviz. Aimed
-#              to be used with the results produced with the script human_methylation.R.
+#              to be used with the results produced with the script human_methylation.R or mouse_methylation.R.
 #
 
 # REQUIRED PACKAGES
