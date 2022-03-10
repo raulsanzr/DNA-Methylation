@@ -12,7 +12,7 @@ that could lead to biases and a differential methylation analysis to
 identify, annotate and represent DMPs and DMRs.
 
 > **Note**: This document is generated from
-> [human_methylation.Rmd](https://github.com/raulsanzr/FDP/blob/main/scripts/human_methylation.Rmd),
+> [human_methylation.Rmd](https://github.com/raulsanzr/FDP/blob/main/documents/human_methylation.Rmd),
 > which is adapted from
 > [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/scripts/human_methylation.R).
 
