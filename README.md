@@ -113,7 +113,7 @@ ggplot(mean_p, aes(x=Sample, y=p_values, fill=p_values))+
         axis.text.x=element_text(angle=30, vjust=1, hjust=1))
 ```
 
-![](results/references/det_p.png)<!-- -->
+![](results/Detection_p.png)<!-- -->
 
 ## Preprocessing
 
@@ -200,7 +200,7 @@ ranges between 0 and 1 representing a completely unmethylated or
 methylated site, respectively. It is calculated using the following
 formula:
 
-![\\beta=\\frac{M}{M+U+100}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta%3D%5Cfrac%7BM%7D%7BM%2BU%2B100%7D "\beta=\frac{M}{M+U+100}").
+![\\beta=\\frac{M}{M+U+100}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta%3D%5Cfrac%7BM%7D%7BM%2BU%2B100%7D "\beta=\frac{M}{M+U+100}")
 
 ``` r
 beta_values <- getBeta(gmSet)
@@ -251,7 +251,7 @@ autoplot(pca_res, x=1, y=2,data=metadata, colour="Condition")+
   theme_bw()
 ```
 
-![](results/references/pca_cond.png)<!-- -->
+![](results/PCA_Condition.png)<!-- -->
 
 #### Plotting by cell type
 
@@ -263,7 +263,7 @@ autoplot(pca_res, x=1, y=2,data=metadata, colour="CellType", shape = "Type")+
   theme_bw()
 ```
 
-![](results/references/pca_cell.png)<!-- -->
+![](results/PCA_CellType.png)<!-- -->
 
 ## Differential methylation analysis
 
@@ -365,7 +365,7 @@ ggplot(DMP_annCGI, aes(Contrast, fill=Relation_to_Island))+
   xlab("")
 ```
 
-![](results/references/dmp_cgi.png)<!-- -->
+![](results/DMP_CGI.png)<!-- -->
 
 #### DMPs relative to gene components
 
@@ -383,7 +383,7 @@ ggplot(DMP_Gene_Group, aes(Contrast, fill=UCSC_RefGene_Group_short))+
   labs(fill="UCSC_RefGene")
 ```
 
-![](results/references/dmp_gene.png)<!-- -->
+![](results/DMP_gene.png)<!-- -->
 
 #### Heatmap of the DMPs
 
@@ -397,7 +397,7 @@ heatmap.2(as.matrix(t(unique(DMP_beta))), trace="none", density.inf="none",
           margins=c(7,10), col=colors, cexRow = 1, lwid = c(5,15), lhei = c(5,15))
 ```
 
-![](results/references/dmp_heatmap.png)<!-- -->
+![](results/DMP_heatmap.png)<!-- -->
 
 ### Differentially Methylated Regions
 
@@ -461,7 +461,7 @@ DMR.GR <- makeGRangesFromDataFrame(DMR.list[3])
 DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", genome="hg19")
 ```
 
-![](results/references/dmr.png)<!-- -->
+![](results/DMR_example.png)<!-- -->
 
 > **Note**: Other regions of the genome can be plotted using the
 > [plot_DMR.R](https://github.com/raulsanzr/FDP/blob/main/scripts/plot_DMR.R)
