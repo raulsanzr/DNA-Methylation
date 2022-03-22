@@ -2,7 +2,7 @@
 # Josep Carreras Leukaemia Research Institute (IJC)                            
 # Authors: Raúl Sanz, Angelika Merkel | Bioinformatics Unit                    
 # Project: PIK3Ca mutation study                                                     
-# Collaborators: Mariona Graupera, Damiana Álvarez, Sandra del Castillo                           
+# Collaborators: Mariona Graupera, Sandra del Castillo                           
 #
 # Description: Workflow to analyze human methylation array data from Illumina's Infinium MethylationEPIC BeadChip.
 #
