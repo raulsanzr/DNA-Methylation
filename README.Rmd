@@ -9,7 +9,7 @@ This document contains the workflow for the analysis of human methylation array 
 
 It comprises a preprocessing step to normalize and filter the raw data that could lead to biases and a differential methylation analysis to identify, annotate and represent DMPs and DMRs.
 
-> __Note__: This document is generated from [human_methylation.Rmd](https://github.com/raulsanzr/FDP/blob/main/scripts/human_methylation.Rmd), which is adapted from [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/scripts/human_methylation.R).
+> __Note__: This document is the markdown version of [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/R/human_methylation.R).
 
 ## Required packages
 
@@ -74,7 +74,7 @@ Detection p-values provide a measure of how likely the signal of a probe is diff
 
 ```{r det_p, message=F}
 # detection p-values
-p_values <- detectionP(rgSet, type = "m+u")
+p_values <- detectionP(rgSet, type="m+u")
 
 # mean detection p-values
 mean_p <- data.frame(p_values=colMeans(p_values), Sample=metadata$Sample)
@@ -149,7 +149,7 @@ gmSet <- gmSet[keep,]
 
 The beta-value is a measurement of the methylation at a CpG site that ranges between 0 and 1 representing a completely unmethylated or methylated site, respectively. It is calculated using the following formula:
 
-$\beta=\frac{M}{M+U+100}$. 
+$\beta=\frac{M}{M+U+100}$
 
 ```{r}
 beta_values <- getBeta(gmSet)
@@ -363,7 +363,7 @@ DMR.GR <- makeGRangesFromDataFrame(DMR.list[3])
 DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", genome="hg19")
 ```
 
-> __Note__: Other regions of the genome can be plotted using the [plot_DMR.R](https://github.com/raulsanzr/FDP/blob/main/scripts/plot_DMR.R) script.
+> __Note__: Other regions of the genome can be plotted using the [plot_DMR.R](https://github.com/raulsanzr/FDP/blob/main/R/plot_DMR.R) script.
 
 ## Session information
 

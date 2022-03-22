@@ -11,10 +11,8 @@ It comprises a preprocessing step to normalize and filter the raw data
 that could lead to biases and a differential methylation analysis to
 identify, annotate and represent DMPs and DMRs.
 
-> **Note**: This document is generated from
-> [human_methylation.Rmd](https://github.com/raulsanzr/FDP/blob/main/documents/human_methylation.Rmd),
-> which is adapted from
-> [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/scripts/human_methylation.R).
+> **Note**: This document is the markdown version of
+> [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/R/human_methylation.R).
 
 ## Required packages
 
@@ -98,7 +96,7 @@ detection p-values for every sample with respect to the cutoff (p=0.01).
 
 ``` r
 # detection p-values
-p_values <- detectionP(rgSet, type = "m+u")
+p_values <- detectionP(rgSet, type="m+u")
 
 # mean detection p-values
 mean_p <- data.frame(p_values=colMeans(p_values), Sample=metadata$Sample)
@@ -464,7 +462,7 @@ DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", ar
 ![](results/DMR_example.png)<!-- -->
 
 > **Note**: Other regions of the genome can be plotted using the
-> [plot_DMR.R](https://github.com/raulsanzr/FDP/blob/main/scripts/plot_DMR.R)
+> [plot_DMR.R](https://github.com/raulsanzr/FDP/blob/main/R/plot_DMR.R)
 > script.
 
 ## Session information
