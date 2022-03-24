@@ -3,59 +3,60 @@ Analysis of human methylation data with R
 
 ## Description
 
-This document contains the workflow for the analysis of human
-methylation array data using R and mainly three Bioconductor packages:
-`minfi`, `limma`, and `DMRcate`.
+This document describes the workflow for analyzing of human methylation
+array data using R and mainly three Bioconductor packages: `minfi`,
+`limma`, and `DMRcate`. It includes the import and preprocessing of the
+data, followed by differential methylation analysis to find and annotate
+differentially methylated positions (DMPs) and regions (DMRs).
 
-It comprises a preprocessing step to normalize and filter the raw data
-that could lead to biases and a differential methylation analysis to
-identify, annotate and represent DMPs and DMRs.
-
-> **Note**: This document is the markdown version of
-> [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/R/human_methylation.R).
+> **Note**: This document is the markdown version of the
+> [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/R/human_methylation.R)
+> script.
 
 ## Required packages
 
 ``` r
-library(minfi)
-library(limma)
-library(DMRcate)
-library(maxprobes)
-library(readxl)
-library(dplyr)
-library(ggplot2)
-library(ggrepel)
-library(ggfortify)
-library(gplots)
-library(RColorBrewer)
+library(minfi)        # BiocManager::install("minfi")
+library(limma)        # BiocManager::install("limma")
+library(DMRcate)      # BiocManager::install("DMRcate")
+library(maxprobes)    # remotes::install_github("markgene/maxprobes")
+library(readxl)       # install.packages("readxl")
+library(dplyr)        # install.packages("dplyr")
+library(ggplot2)      # install.packages("ggplot2")
+library(ggrepel)      # install.packages("ggrepel")
+library(ggfortify)    # install.packages("ggfortify")
+library(gplots)       # install.packages("gplots")
+library(RColorBrewer) # install.packages("RColorBrewer")
 ```
 
 ## Loading the data
 
 ### Methylation data
 
-The data for this study was produced by the Infinium MethylationEPIC
-BeadChip array designed by Illumina in 2016, which quantifies the
-methylation levels in more than 850,000 different CpG sites of the human
-genome.
+The data for this study was produced by the *Infinium MethylationEPIC
+BeadChip* array designed by Illumina in 2016. This microarray quantifies
+the methylation levels in more than 850,000 different CpG sites of the
+human genome. However, this workflow can also be used with data obtained
+from the previous version of the chip (*Infinium HumanMethylation450
+BeadChip*) by changing a couple of parameters.
 
-The following function from `minfi` can to read all the IDAT files
-produced by the array and stores this data in an RGChannelSet object
-together with its corresponding annotation.
+The following function from `minfi` can read all the IDAT files produced
+by the array and store this data in an RGChannelSet object with its
+corresponding annotation.
 
 ``` r
-rgSet <- read.metharray.exp("data/human/")
-class(rgSet)[1]
+rgSet <- read.metharray.exp("data/human/") # folder where the IDAT files are placed
 ```
 
-    ## [1] "RGChannelSet"
-
 ### Metadata
+
+The metadata is a file that includes relevant information about the
+samples that will be useful later to group them.
 
 ``` r
 metadata <- as.data.frame(read_excel("data/human/PIK3CA_samples_SC.xlsx"))
 
-# renaming and removing redundant information
+# renaming variables and removing redundant information
 names(metadata)[1:10] <- c("Sample", "Organism", "Tissue", "Type", "Condition", "Preservation", 
                            "DNA_quantity", "EPIC_ID", "EPIC_position", "EPIC_barcode")
 metadata$CellType <- paste(metadata$CellType1, metadata$CellType2, sep="_" )
@@ -80,19 +81,20 @@ head(metadata)
 ### QC report
 
 `minfi` incorporates a function that generates a quality control report
-of the raw data in PDF format. This document includes several plots to
-assess the distribution of the detected methylation intensities.
+from the raw data in PDF format. It includes plots representing the
+distribution of the detected methylation intensities for each sample and
+at each detection step.
 
 ``` r
-# quality control report for the raw data
 qcReport(rgSet, pdf="results/human/qcReport.pdf", sampGroups=metadata$Condition, sampNames=metadata$Sample)
 ```
 
 ### Detection p-values
 
 Detection p-values provide a measure of how likely the signal of a probe
-is different from the background. The next plot includes the mean of the
-detection p-values for every sample with respect to the cutoff (p=0.01).
+is different from the background. The next barplot shows the mean of the
+detection p-values for every sample with respect to the cutoff
+(![p=0.01](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;p%3D0.01 "p=0.01")).
 
 ``` r
 # detection p-values
@@ -111,13 +113,13 @@ ggplot(mean_p, aes(x=Sample, y=p_values, fill=p_values))+
         axis.text.x=element_text(angle=30, vjust=1, hjust=1))
 ```
 
-![](results/Detection_p.png)<!-- -->
+![](results/human/Detection_p.png)<!-- -->
 
 ## Preprocessing
 
 ### Normalization
 
-There are some different options in `minfi` to perform normalization.
+There are some different options to normalize the data with `minfi`.
 Which one to use will always depend on the characteristics of the data
 to analyze.
 
@@ -129,22 +131,20 @@ to analyze.
     correction.
 -   `preprocessFunnorm`: Functional normalization.
 
-> **Note**: Find more information about the different preprocessing
+> **Note**: Find more documentation about the different preprocessing
 > functions
 > [here](https://www.bioconductor.org/help/course-materials/2015/BioC2015/methylation450k.html#preprocessing-and-normalization).
 
 ``` r
 mSet <- preprocessNoob(rgSet)
-class(mSet)[1]
 ```
-
-    ## [1] "MethylSet"
 
 ### Removing low quality probes
 
-Probes with a detection p-value above the cutoff (p=0.01) could be
-generated by the background signal and may not be reliable enough. It is
-recommended to remove those sites to avoid biases.
+Probes with a detection p-value above the cutoff
+(![p \\ge 0.01](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;p%20%5Cge%200.01 "p \ge 0.01"))
+are not significant and may not be reliable enough. It is recommended to
+remove those sites to avoid biases.
 
 ``` r
 keep <- rowSums(p_values < 0.01) == ncol(mSet)
@@ -153,18 +153,19 @@ mSet <- mSet[keep,]
 
 ### Removing probes with known SNPs
 
+The function `dropLociWithSnps` allows discarding those probes known to
+have a single nucleotide polymorphism.
+
 ``` r
 gmSet <- dropLociWithSnps(mapToGenome(mSet))
-class(gmSet)[1]
 ```
-
-    ## [1] "GenomicMethylSet"
 
 ### Removing cross reactive probes
 
 Cross-reactive probes are sites found to map at different genome
-locations (which usually involves a autosomal and a sex chromosome). The
-function `xreactive_probes` excludes the probes found at [Pidsley et
+locations (which usually involves an autosomal and a sex chromosome). In
+the function `xreactive_probes` there are collected and annotated those
+probes found in [Pidsley et
 al.](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1066-1)
 and [McCartney et
 al.](https://www.sciencedirect.com/science/article/pii/S221359601630071X)
@@ -179,10 +180,10 @@ gmSet <- gmSet[keep,]
 ### Removing sex chromosomes probes
 
 CpG sites present at the sexual chromosomes (chrX and chrY) can be
-differently methylated in males and females for many other variables not
+differently methylated in males and females for many other factors not
 included in the analysis. In this case, those probes should be removed
-because the gender of the individuals is not a factor under study.
-Otherwise, if we were interested in studying the differences in
+because the gender of the individuals is not a variable under study.
+However, if we were interested in studying the differences in
 methylation between males and females, we should keep those sites.
 
 ``` r
@@ -193,9 +194,9 @@ gmSet <- gmSet[keep,]
 
 ### Obtaining the beta values
 
-The beta-value is a measurement of the methylation at a CpG site that
-ranges between 0 and 1 representing a completely unmethylated or
-methylated site, respectively. It is calculated using the following
+The beta-value is a measurement of the methylation at the CpG site level
+that ranges between 0 and 1, representing a completely unmethylated or
+methylated site, respectively. It can be calculated using the following
 formula:
 
 ![\\beta=\\frac{M}{M+U+100}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta%3D%5Cfrac%7BM%7D%7BM%2BU%2B100%7D "\beta=\frac{M}{M+U+100}")
@@ -217,18 +218,18 @@ head(beta_values[,1:6])
 ## Principal Component Analysis
 
 Principal Component Analysis (PCA) is a dimensionality reduction
-technique used to reduce a data set with many features into the
-so-called principal components. Those are a few variables that aim to
-explain as much variability as possible in order to be able to represent
-the data in two (or three) dimensions.
+technique used to reduce a data set with many variables into a few
+called principal components. Those are variables built by the
+combination of the initial ones that aim to explain as much variance as
+possible in order to be able to represent the data in two (or three)
+dimensions.
 
 ### PCA on the most variable sites
 
-Selecting the sites with higher variation across samples may be an
-approach to reduce the number of inputs for the PCA and speed up the
-calculation by avoiding the use of “meaningless” features. However, the
-number of selected variables should be large enough because a small
-number can reduce the accuracy of the PCA.
+Selecting the sites with higher variation across the samples is an
+approach to reduce the number of inputs and speed up the PCA
+calculation. However, the number of selected sites should be large
+enough not to reduce the performance of the PCA.
 
 ``` r
 # selecting the top 100 most variable CpGs
@@ -237,7 +238,7 @@ keep <- names(head(sort(sdv,decreasing=T), 100))
 beta_top100 <- beta_values[keep,]
 
 # PCA calculation
-pca_res <- prcomp(t(beta_top100), scale=T, center=T)
+pca_res <- prcomp(t(beta_top100), scale=T, center=T) # ! the matrix needs to transpose
 ```
 
 #### Plotting by condition
@@ -249,7 +250,7 @@ autoplot(pca_res, x=1, y=2,data=metadata, colour="Condition")+
   theme_bw()
 ```
 
-![](results/PCA_Condition.png)<!-- -->
+![](results/human/PCA_Condition.png)<!-- -->
 
 #### Plotting by cell type
 
@@ -261,22 +262,22 @@ autoplot(pca_res, x=1, y=2,data=metadata, colour="CellType", shape = "Type")+
   theme_bw()
 ```
 
-![](results/PCA_CellType.png)<!-- -->
+![](results/human/PCA_CellType.png)<!-- -->
 
 ## Differential methylation analysis
 
 ### Differentially Methylated Positions
 
-The differentially methylated positions (DMPs) are single CpG sites that
-present statistical differences in the methylation levels when comparing
-the different groups under study.
+The differentially methylated positions (DMPs) are individual CpG sites
+showing statistically different methylation levels across the study
+samples.
 
 #### Finding DMPs
 
 Those positions can be detected using `limma` to build linear models
 that look for significant differences in the beta values at single
-probes. In this case, all pairwise comparisons will be performed between
-the samples grouped by their condition.
+probes. In this case, all pairwise comparisons will be performed for the
+samples grouped by condition.
 
 ``` r
 # building the design matrix
@@ -300,8 +301,8 @@ fit2 <- eBayes(fit2)
 summary(decideTests(fit2, p.value=0.01))
 ```
 
-> **Note**: DMPs are classified in hypomethylated (loss of methylation)
-> or hypermethylated (gain of methylation) sites.
+> **Note**: DMPs can be either hypomethylated (loss of methylation) or
+> hypermethylated (gain of methylation) sites.
 
 |                   | Hypomethylated | Hypermethylated | TOTAL |
 |:------------------|:--------------:|:---------------:|:-----:|
@@ -314,8 +315,8 @@ summary(decideTests(fit2, p.value=0.01))
 
 #### Annotating the DMPs
 
-In the previous step, we obtained the differently methylated sites, but
-annotating them will provide us specific information relative to where
+In the previous step, we obtained differently methylated sites, but
+annotating them will provide more specific information relative to where
 they are located in the genome.
 
 ``` r
@@ -346,10 +347,10 @@ DMP_ann$Type[which(DMP_ann$logFC > 0)] <- "Hypomethylated"
 
 # gene feature annotation
 DMP_ann$UCSC_RefGene_Group[which(DMP_ann$UCSC_RefGene_Group == "")] <- "."
-DMP_ann$UCSC_RefGene_Group_short <- unlist(lapply(strsplit(DMP_ann$UCSC_RefGene_Group, ";"),'[[', 1))
+DMP_ann$UCSC_RefGene_Group_short <- unlist(lapply(strsplit(DMP_ann$UCSC_RefGene_Group,";"),'[[', 1))
 ```
 
-#### DMPs relative to CpG islands
+#### DMPs by CpG islands
 
 ``` r
 DMP_annCGI <- DMP_ann[, c("Contrast", "Relation_to_Island", "Type")]
@@ -363,9 +364,9 @@ ggplot(DMP_annCGI, aes(Contrast, fill=Relation_to_Island))+
   xlab("")
 ```
 
-![](results/DMP_CGI.png)<!-- -->
+![](results/human/DMP_CGI.png)<!-- -->
 
-#### DMPs relative to gene components
+#### DMPs by gene elements
 
 ``` r
 DMP_Gene_Group <- DMP_ann[,c("Contrast","UCSC_RefGene_Group_short", "Type")]
@@ -381,9 +382,9 @@ ggplot(DMP_Gene_Group, aes(Contrast, fill=UCSC_RefGene_Group_short))+
   labs(fill="UCSC_RefGene")
 ```
 
-![](results/DMP_gene.png)<!-- -->
+![](results/human/DMP_gene.png)<!-- -->
 
-#### Heatmap of the DMPs
+#### Heatmap of DMPs
 
 ``` r
 # joining the DMPs with their beta values
@@ -395,7 +396,7 @@ heatmap.2(as.matrix(t(unique(DMP_beta))), trace="none", density.inf="none",
           margins=c(7,10), col=colors, cexRow = 1, lwid = c(5,15), lhei = c(5,15))
 ```
 
-![](results/DMP_heatmap.png)<!-- -->
+![](results/human/DMP_heatmap.png)<!-- -->
 
 ### Differentially Methylated Regions
 
@@ -405,8 +406,8 @@ methylation is compared at regions formed by two or more CpGs.
 
 #### Finding and annotating DMRs
 
-`DMRcate` is a package that allows to find and annotate DMRs from the
-beta values giving the design and the contrast matrices. It generates a
+`DMRcate` is a package that allows finding and annotating DMRs from the
+beta values given a design and a contrast matrix. It generates a
 GenomicRanges object containing the coordinates of the DMR and some
 statistics that support the finding.
 
@@ -442,8 +443,8 @@ DMR.list[[1]][,c(2:7,14)]
 
 #### Plotting DMRs
 
-This package also provides the function `DMR.plot` to plot the DMRs
-using different tracks based on the `Gviz` package.
+This package also includes the function `DMR.plot` to plot the found
+DMRs based on `Gviz` representations by tracks.
 
 ``` r
 pal <- brewer.pal(8, "Dark2") # palette
@@ -456,12 +457,13 @@ cols <- groups[as.character(factor(metadata$Condition))]
 # is needed to convert the data frame into a genomic ranges object
 DMR.GR <- makeGRangesFromDataFrame(DMR.list[3])
 
-DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", genome="hg19")
+DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", 
+         genome="hg19")
 ```
 
-![](results/DMR_example.png)<!-- -->
+![](results/human/DMR_example.png)<!-- -->
 
-> **Note**: Other regions of the genome can be plotted using the
+> **Note**: Other desired regions of the genome can be plotted using the
 > [plot_DMR.R](https://github.com/raulsanzr/FDP/blob/main/R/plot_DMR.R)
 > script.
 
@@ -566,7 +568,7 @@ DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", ar
     ##  [42] nnet_7.3-17                                       
     ##  [43] gtable_0.3.0                                      
     ##  [44] ensembldb_2.18.3                                  
-    ##  [45] rlang_1.0.1                                       
+    ##  [45] rlang_1.0.2                                       
     ##  [46] genefilter_1.76.0                                 
     ##  [47] splines_4.1.2                                     
     ##  [48] rtracklayer_1.54.0                                
