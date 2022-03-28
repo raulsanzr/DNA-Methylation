@@ -1,2 +1,0 @@
-"","seqnames","start","end","width","strand","no.cpgs","min_smoothed_fdr","Stouffer","HMFDR","Fisher","maxdiff","meandiff","overlapping.genes"
-"1","chr17",6338566,6338571,6,"*",2,3.17914574215972e-36,0.999999999988965,0.999998886760539,0.999999999997521,0.250416587964238,0.228341203963931,NA
