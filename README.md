@@ -325,21 +325,22 @@ contrasts <- colnames(contMat)
 # matching beta values with annotation by the probe names
 annEPICSub <- ann[match(rownames(beta_values),ann$Name), c(1:4,12:19,22:ncol(ann))]
 
-DMP.list=list() # list to store the DMPs
-cg=list() # list to store the names of significant probes
+DMP.list <- data.frame() # df to store the DMPs
+cg <- list() # list to store the names of significant probes
 
 for (i in 1:length(contrasts)){
   # extract the significant DMPs and annotate
   DMP <- topTable(fit2, num=Inf, coef=i, genelist=annEPICSub, p.value=0.01)
   DMP$Contrast <- contrasts[i]
   # saving the results
-  DMP.list[[i]] <- DMP
+  DMP.list <- rbind(DMP.list, DMP)
   cg[[i]] <- row.names(DMP)
-  # write.csv(DMP_1, file=paste0("results/human/DMP/DMP_", contrasts[i], ".csv"))
 }
 
-# merging all the DMPs
-DMP_ann <- do.call(rbind, DMP.list)
+# write.csv(DMP.list, "results/human/DMP_list.csv")
+
+### merging all the DMP's
+DMP_ann <- DMP.list
 
 # classifying DMPs according to its change in methylation
 DMP_ann$Type <- "Hypermethylated"
@@ -412,26 +413,29 @@ GenomicRanges object containing the coordinates of the DMR and some
 statistics that support the finding.
 
 ``` r
-DMR.list <- list()
+DMR.list <- data.frame()
 for(i in 1:length(contrasts)){
-  # annotating the CpGs for each contrast + finding significant CpGs
-  myAnnotation <- cpg.annotate(object=beta_values, datatype="array", what="Beta", contrasts=T,
-                               design=designMat, analysis.type="differential", cont.matrix=contMat, 
+  # annotating the CpG's for each contrast + finding significant CpG's
+  myAnnotation <- cpg.annotate(object=beta_values, datatype="array", what="Beta", contrasts=T, 
+                               design=designMat, cont.matrix=contMat, analysis.type="differential",
                                coef=gsub("_", " - ", as.character(contrasts[i])), arraytype="EPIC")
-
-  if (sum(myAnnotation@ranges@elementMetadata@listData$is.sig)!=0){ # if there are significant CpGs
+  
+  if(sum(myAnnotation@ranges@elementMetadata@listData$is.sig)!=0){ # if there are significant CpG's
     # test for DMRs
-    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    DMR_raw <- dmrcate(myAnnotation, lambda=1000, C=2)
     # extract genomic ranges
-    results.ranges <- extractRanges(DMRs)
+    results.ranges <- extractRanges(DMR_raw)
     # saving the results
-    DMR.list[[i]] <- data.frame(Contrast=contrasts[i], results.ranges)
-    # write.csv(results.ranges, paste0("results/human/DMR/DMR_", contrasts[i], ".csv"))
+    DMR <- data.frame(Contrast=contrasts[i], results.ranges)
+    DMR.list <- rbind(DMR.list, DMR)
   }
 }
 
+DMR.list$overlapping.genes <- unlist(DMR.list$overlapping.genes)
+# write.csv(DMR.list, "results/human/DMR_list.csv")
+
 # showing the found DMRs for the first contrast: control vs E542K
-DMR.list[[1]][,c(2:7,14)]
+head(DMR.list[,c(2:7,14)], 5)
 ```
 
     ##   seqnames     start       end width strand no.cpgs overlapping.genes
@@ -455,7 +459,7 @@ names(groups) <- levels(factor(metadata$Condition))
 cols <- groups[as.character(factor(metadata$Condition))]
 
 # is needed to convert the data frame into a genomic ranges object
-DMR.GR <- makeGRangesFromDataFrame(DMR.list[3])
+DMR.GR <- makeGRangesFromDataFrame(DMR.list)
 
 DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", 
          genome="hg19")
