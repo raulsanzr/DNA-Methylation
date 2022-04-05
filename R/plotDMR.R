@@ -1,8 +1,7 @@
 #
 # Author: Raúl Sanz
 #
-# Description: Script to create plots for the differential methylation and the detected DMRs in a specified range of the genome with Gviz. Aimed
-#              to be used with the results produced with the script human_methylation.R or mouse_methylation.R.
+# Description: Script to plot the methylation and the detected DMRs in a defined range of the genome.
 #
 
 # REQUIRED PACKAGES
@@ -55,7 +54,7 @@ plot.DMR <- function(genome, chr, start, end, CpGs, DMRs, enhancers, feature){
              extend.left=0.1, extend.right=0.1, sizes=c(2,2,5,2,2,10,5))
 }
 
-# DEFINING ARGUMENTS
+# USAGE
 
 # reference genome of the specie to plot
 genome <- "hg19"
@@ -81,7 +80,5 @@ DMRs <- read.csv("results/DMRs/DMR_Control_E542K.csv")
 
 # feature to group the samples (optional)
 feature <- metadata$Condition
-
-# USAGE
 
 plot.DMR(genome, chr, start, end, CpGs, DMRs, enhancers, feature)

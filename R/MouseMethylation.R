@@ -1,15 +1,12 @@
 #
 # Josep Carreras Leukaemia Research Institute (IJC)                            
 # Authors: Raúl Sanz, Angelika Merkel | Bioinformatics Unit                    
-# Project: PIK3Ca mutation study                                                     
-# Collaborators: Mariona Graupera, Damiana Álvarez, Sandra del Castillo                           
 #
 # Description: Workflow to analyze mouse methylation array data from Illumina's Infinium Mouse Methylation BeadChip.
 #
-# Note: minfi has not already implemented functions to analyze mouse methylation data. For this reason, in this script, the procedure aims to
-#       achieve the same results in a different way.
+# Note: minfi has not already implemented functions to analyze mouse methylation data.
 #
-# * files produced with the script mouse_annotation.R
+# * files produced with the script R/MouseAnnotation.R
 #
 
 # REQUIRED PACKAGES
@@ -54,10 +51,6 @@ beta_values <- beta_values[which(row.names(beta_values) %in% cg_autosomes),]
 cg_probes <-  manifest$Name_long[which(manifest$Probe_Type == "cg" | manifest$Probe_Type == "ch")]
 beta_values <- beta_values[which(row.names(beta_values) %in% cg_probes),]
 
-# removing outliers (in case there are)
-metadata <- metadata[metadata$Observation != "OB42",]
-beta_values <- beta_values[, grep("OB42", colnames(beta_values), invert=T)]
-
 # PRINCIPAL COMPONENT ANALYSIS
 
 # selecting the top 100 most variable CpGs to reduce the number of inputs
@@ -69,11 +62,16 @@ beta_top100 <- beta_values[keep, ]
 pca_res <- prcomp(t(beta_top100), scale=T, center=T)
 
 ## plotting PC1 and PC2 by group
-autoplot(pca_res, data=metadata, colour="Group", shape="Time") +
-  geom_text_repel(aes(label=Sample, color=Group), hjust=-0.3, vjust=0, show.legend=F, size=3.5) +
+autoplot(pca_res, data=metadata, colour="Group", shape="Time")+
+  geom_text_repel(aes(label=Sample, color=Group), hjust=-0.3, vjust=0, show.legend=F, size=3.5)+
   labs(colour="Condition")+
-  theme_bw() + 
+  theme_bw()+ 
+  ggtitle("OB42 removed")+
   xlim(c(-0.5, 0.4)) + ylim(c(-0.5, 0.6))
+
+# removing outliers (in case there are)
+metadata <- metadata[metadata$Observation != "OB42",]
+beta_values <- beta_values[, grep("OB42", colnames(beta_values), invert=T)]
 
 # DIFFERENTIAL METHYLATION ANALYSIS
 
@@ -99,40 +97,51 @@ colnames(DMP_summary) <- gsub(" - ","_", colnames(DMP_summary))
 ### getting the significant positions
 CpG_sig <- topTable(fit2, p.value=0.01, number=Inf)
 ### adding the beta values
-DMPs <- data.frame(beta_values[which(rownames(beta_values) %in% rownames(CpG_sig)),])
+DMP <- data.frame(beta_values[which(rownames(beta_values) %in% rownames(CpG_sig)),])
 ### adding the p-values and the adjusted p-values
-DMPs$adj.pval <- as.numeric(CpG_sig$adj.P.Val[which(row.names(CpG_sig) %in% row.names(DMPs))])
-DMPs$pval <- as.numeric(CpG_sig$P.Value[which(row.names(CpG_sig) %in% row.names(DMPs))])
+DMP$adj.pval <- as.numeric(CpG_sig$adj.P.Val[which(row.names(CpG_sig) %in% row.names(DMP))])
+DMP$pval <- as.numeric(CpG_sig$P.Value[which(row.names(CpG_sig) %in% row.names(DMP))])
 
 ### difference in methylation between controls and mutation samples at the two time points
-DMPs$mean_diff_16h <- rowMeans(DMPs[c("OB39_et_16h", "OB41_et_16h")]) - rowMeans(DMPs[c("OB39_4OH_16h", "OB41_4OH_16h")])
-DMPs$mean_diff_96h <- rowMeans(DMPs[c("OB39_et_96h", "OB41_et_96h")]) - rowMeans(DMPs[c("OB39_4OH_96h", "OB41_4OH_96h")])
+DMP$mean_diff_16h <- rowMeans(DMP[c("OB39_et_16h", "OB41_et_16h")]) - rowMeans(DMP[c("OB39_4OH_16h", "OB41_4OH_16h")])
+DMP$mean_diff_96h <- rowMeans(DMP[c("OB39_et_96h", "OB41_et_96h")]) - rowMeans(DMP[c("OB39_4OH_96h", "OB41_4OH_96h")])
 
 ### getting the positions with higher difference
-DMPs[order(DMPs$mean_diff_16h),]
+DMP[order(DMP$mean_diff_16h),]
 
 ## annotating the DMPs
 annNCBIshort <- read.csv("data/annNCBIshort_mouse.csv") # NCBI annotation file *
 
 ### joining the DMPs with the manifest
-DMPs$Name_long  <- row.names(DMPs)
-DMPs_ann <- left_join(DMPs, manifest, by="Name_long")
+DMP$Name_long  <- row.names(DMP)
+DMP_ann <- left_join(DMP, manifest, by="Name_long")
 
 ### Adding the NCBI annotation
-DMPs_ann$name <- unlist(lapply(strsplit(DMPs_ann$Name_long,"_"), "[[", 1))
-DMPs_ann_NCBI <- left_join(DMPs_ann, annNCBIshort, by="name")
+DMP_ann$name <- unlist(lapply(strsplit(DMP_ann$Name_long,"_"), "[[", 1))
+DMP_ann_NCBI <- left_join(DMP_ann, annNCBIshort, by="name")
 
 ## selecting the DMPs above a threshold (mean diff >= 0.2) in the difference of methylation
-DMPs_ann_short <- DMPs_ann_NCBI[(abs(DMPs_ann_NCBI$mean_diff_16h)>= 0.2) | (abs(DMPs_ann_NCBI$mean_diff_96h)>= 0.2), c(1:13, 16, 17, 20:22, 26)]
+DMP_ann_short <- DMP_ann_NCBI[(abs(DMP_ann_NCBI$mean_diff_16h)>= 0.2) | (abs(DMP_ann_NCBI$mean_diff_96h)>= 0.2), c(1:13, 16, 17, 20:22, 26)]
 
 ## saving the results
-write.csv(DMPs_ann_NCBI, file="results/DMPs/DMP_ann.csv")
+# write.csv(DMP_ann_NCBI, file="results/mouse/DMP_list.csv")
+
+## heatmap of DMPs
+cg <- DMP_ann_short$Name_long[!is.na(DMP_ann_short$Name_long)]
+DMP_beta <- data.frame(beta_values[cg, ]) # joining the DMPs with their beta values
+
+colors <- colorRampPalette(c("royalblue", "white", "red"))(n=100) # range of colors
+heatmap.2(as.matrix(t(unique(DMP_beta))), trace="none", density.inf="none", 
+          margins=c(7,10), col=colors, cexRow = 1, lwid = c(5,15), lhei = c(5,15))
 
 # differentially methylated regions (DMRs)
-## finding and annotating the DMPs
-DMR_Control_Mutation <- bumphunter(beta_values, design=designMat, chr=manifest$CHR, pos=manifest$MAPINFO, cutoff=0.5, coef=3)
+## finding and annotating the DMRs
+DMR <- bumphunter(beta_values, design=designMat, chr=manifest$CHR, pos=manifest$MAPINFO, cutoff=0.5, coef=3)
+
+## filtering DMRs by number of CpGs (L) and by overall difference (area)
+DMR_flt <- DMR$table %>% filter(L>3) %>% filter(area>0.2)
 
 ## saving the results
-write.csv(DMR_Control_Mutation$table, file="results/DMR/DMR_Control_Mutation.csv")
+# write.csv(DMR_flt, file="results/mouse/DMR_list.csv")
 
-# Note: Those DMRs found can be plotted using the plot_DMR.R script.
+# Note: Those DMRs found can be plotted using the R/plotDMR.R script.

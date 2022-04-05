@@ -1,25 +1,37 @@
 #
 # Josep Carreras Leukaemia Research Institute (IJC)                            
 # Authors: Raúl Sanz, Angelika Merkel | Bioinformatics Unit                    
-# Project: PIK3Ca mutation study                                                     
-# Collaborators: Mariona Graupera, Sandra del Castillo                           
 #
 # Description: Workflow to analyze human methylation array data from Illumina's Infinium MethylationEPIC BeadChip.
 #
 
+# INSTALL PACKAGES
+
+# BiocManager::install("minfi")
+# BiocManager::install("limma")
+# BiocManager::install("DMRcate")
+# remotes::install_github("markgene/maxprobes")
+# install.packages("readxl")
+# install.packages("dplyr")
+# install.packages("ggplot2")
+# install.packages("ggrepel")
+# install.packages("ggfortify")
+# install.packages("gplots")
+# install.packages("RColorBrewer")
+
 # REQUIRED PACKAGES
 
 library(minfi)
+library(limma)
+library(DMRcate)
+library(maxprobes)
 library(readxl)
 library(dplyr)
 library(ggplot2)
-library(gplots)
 library(ggrepel)
-library(RColorBrewer)
 library(ggfortify)
-library(maxprobes)
-library(limma)
-library(DMRcate)
+library(gplots)
+library(RColorBrewer)
 
 # LOADING THE DATA
 
