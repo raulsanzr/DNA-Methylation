@@ -5,7 +5,7 @@
 # Description: Workflow to analyze human methylation array data from Illumina's Infinium MethylationEPIC BeadChip.
 #
 
-# INSTALL PACKAGES
+# PACKAGES INSTALLATION
 
 # BiocManager::install("minfi")
 # BiocManager::install("limma")

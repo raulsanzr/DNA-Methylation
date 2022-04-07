@@ -4,6 +4,17 @@
 # Description: Script to plot the methylation and the detected DMRs in a defined range of the genome.
 #
 
+# PACKAGES INSTALLATION
+
+# BiocManager::install("Gviz")
+# install.packages("dplyr")
+# BiocManager::install("coMET")
+# BiocManager::install("GenomicFeatures")
+# BiocManager::install("org.Hs.eg.db")
+# BiocManager::install("org.Mm.eg.db")
+# BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")
+# BiocManager::install("TxDb.Mmusculus.UCSC.mm39.refGene")
+
 # REQUIRED PACKAGES
 
 library(Gviz)

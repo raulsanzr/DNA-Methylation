@@ -9,6 +9,17 @@
 # * files produced with the script R/MouseAnnotation.R
 #
 
+# PACKAGES INSTALLATION
+
+# install.packages("readxl")
+# BiocManager::install("ENmix")
+# install.packages("ggplot2")
+# install.packages("ggfortify")
+# install.packages("ggrepel")
+# install.packages("tidyverse")
+# BiocManager::install("limma")
+# BiocManager::install("bumphunter")
+
 # REQUIRED PACKAGES
 
 library(readxl)
