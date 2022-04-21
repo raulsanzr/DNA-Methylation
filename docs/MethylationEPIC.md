@@ -10,22 +10,22 @@ data, followed by differential methylation analysis to find and annotate
 differentially methylated positions (DMPs) and regions (DMRs).
 
 > **Note**: This document is the markdown version of the
-> [human_methylation.R](https://github.com/raulsanzr/FDP/blob/main/R/human_methylation.R)
+> [MethylationEPIC.R](https://github.com/raulsanzr/FDP/blob/main/R/MethylationEPIC.R)
 > script.
 
 ## Required packages
 
 ``` r
-library(minfi)        # BiocManager::install("minfi")
-library(limma)        # BiocManager::install("limma")
-library(DMRcate)      # BiocManager::install("DMRcate")
-library(maxprobes)    # remotes::install_github("markgene/maxprobes")
-library(readxl)       # install.packages("readxl")
-library(dplyr)        # install.packages("dplyr")
-library(ggplot2)      # install.packages("ggplot2")
-library(ggrepel)      # install.packages("ggrepel")
-library(ggfortify)    # install.packages("ggfortify")
-library(gplots)       # install.packages("gplots")
+library(minfi) # BiocManager::install("minfi")
+library(limma) # BiocManager::install("limma")
+library(DMRcate) # BiocManager::install("DMRcate")
+library(maxprobes) # remotes::install_github("markgene/maxprobes")
+library(readxl) # install.packages("readxl")
+library(dplyr) # install.packages("dplyr")
+library(ggplot2) # install.packages("ggplot2")
+library(ggrepel) # install.packages("ggrepel")
+library(ggfortify) # install.packages("ggfortify")
+library(gplots) # install.packages("gplots")
 library(RColorBrewer) # install.packages("RColorBrewer")
 ```
 
@@ -113,7 +113,7 @@ ggplot(mean_p, aes(x=Sample, y=p_values, fill=p_values))+
         axis.text.x=element_text(angle=30, vjust=1, hjust=1))
 ```
 
-![](results/human/Detection_p.png)<!-- -->
+![](refs/Detection_p.png)<!-- -->
 
 ## Preprocessing
 
@@ -250,19 +250,7 @@ autoplot(pca_res, x=1, y=2,data=metadata, colour="Condition")+
   theme_bw()
 ```
 
-![](results/human/PCA_Condition.png)<!-- -->
-
-#### Plotting by cell type
-
-``` r
-autoplot(pca_res, x=1, y=2,data=metadata, colour="CellType", shape = "Type")+
-  geom_text_repel(aes(label=Sample, color=CellType),hjust=-0.1, vjust=0, show.legend=F, size=3.5)+
-  scale_color_brewer(palette="Set1")+ 
-  labs(colour="Cell Type") + xlim(c(-0.5,0.3)) +
-  theme_bw()
-```
-
-![](results/human/PCA_CellType.png)<!-- -->
+![](refs/PCA_Condition.png)<!-- -->
 
 ## Differential methylation analysis
 
@@ -365,7 +353,7 @@ ggplot(DMP_annCGI, aes(Contrast, fill=Relation_to_Island))+
   xlab("")
 ```
 
-![](results/human/DMP_CGI.png)<!-- -->
+![](refs/DMP_CGI.png)<!-- -->
 
 #### DMPs by gene elements
 
@@ -383,7 +371,7 @@ ggplot(DMP_Gene_Group, aes(Contrast, fill=UCSC_RefGene_Group_short))+
   labs(fill="UCSC_RefGene")
 ```
 
-![](results/human/DMP_gene.png)<!-- -->
+![](refs/DMP_gene.png)<!-- -->
 
 #### Heatmap of DMPs
 
@@ -397,7 +385,7 @@ heatmap.2(as.matrix(t(unique(DMP_beta))), trace="none", density.inf="none",
           margins=c(7,10), col=colors, cexRow = 1, lwid = c(5,15), lhei = c(5,15))
 ```
 
-![](results/human/DMP_heatmap.png)<!-- -->
+![](refs/DMP_heatmap.png)<!-- -->
 
 ### Differentially Methylated Regions
 
@@ -461,14 +449,14 @@ cols <- groups[as.character(factor(metadata$Condition))]
 # is needed to convert the data frame into a genomic ranges object
 DMR.GR <- makeGRangesFromDataFrame(DMR.list)
 
-DMR.plot(ranges=DMR.GR, dmr=10, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", 
+DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", 
          genome="hg19")
 ```
 
-![](results/human/DMR_example.png)<!-- -->
+![](refs/DMR_1.png)<!-- -->
 
 > **Note**: Other desired regions of the genome can be plotted using the
-> [plot_DMR.R](https://github.com/raulsanzr/FDP/blob/main/R/plot_DMR.R)
+> [plotDMR.R](https://github.com/raulsanzr/FDP/blob/main/R/plotDMR.R)
 > script.
 
 ## Session information
