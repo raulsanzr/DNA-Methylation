@@ -21,7 +21,7 @@ annNCBIshort <- annotNCBI %>% group_by(name) %>% summarise(NCBI_Gene=paste(uniqu
                                                            NCBI_Transcript=paste(unique(Transcript),collapse=";"),
                                                            NCBI_Feature=paste(unique(Feature),collapse=";"))
 ## saving the results
-write.csv(annNCBIshort, file="data/annNCBIshort_mouse.csv")
+write.csv(annNCBIshort, file="data/ann_NCBI_mouse.csv")
 
 # generating the UCSC annotation
 annotUCSC<- annot[annot$Source=="UCSC",]
@@ -29,7 +29,7 @@ annUCSCshort <- annotUCSC %>% group_by(name) %>% summarise(UCSC_Gene= paste(uniq
                                                            UCSC_Transcript=paste(unique(Transcript),collapse=";"),
                                                            UCSC_Feature=paste(unique(Feature),collapse=";"))
 ## saving the results
-write.csv(annUCSCshort, file="data/annUCSCshort_mouse.csv")
+write.csv(annUCSCshort, file="data/ann_UCSC_mouse.csv")
 
 # generating the manifest file
 manifest <- read_csv("data/Infinium_Mouse_Methylation_v1.0_A1_GS_Manifest.csv", skip=7)
