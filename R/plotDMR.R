@@ -37,11 +37,11 @@ plot.DMR <- function(genome, chr, start, end, CpGs, DMRs, enhancers, feature){
   
   # gene model
   txdb_hg19 <- TxDb.Hsapiens.UCSC.hg19.knownGene # human model
-  ### mouse model: txdb_mm39 <- TxDb.Mmusculus.UCSC.mm39.refGene
+  ### *mouse*: txdb_mm39 <- TxDb.Mmusculus.UCSC.mm39.refGene
   gene_model <- GeneRegionTrack(txdb_hg19, genome=genome, chromosome=chr, showId=TRUE, geneSymbol=TRUE, name="UCSC")
   ## show symbol ID instead of transcript ID
   symbols <- unlist(mapIds(org.Hs.eg.db, gene(gene_model), "SYMBOL", "ENTREZID", multiVals="first"))
-  ### mouse model: symbols <- unlist(mapIds(org.Mm.eg.db, gene(gene_model), "SYMBOL", "ENTREZID", multiVals="first"))
+  ### *mouse*: symbols <- unlist(mapIds(org.Mm.eg.db, gene(gene_model), "SYMBOL", "ENTREZID", multiVals="first"))
   symbol(gene_model) <- symbols[gene(gene_model)]
   
   # enhancers
@@ -71,12 +71,12 @@ plot.DMR <- function(genome, chr, start, end, CpGs, DMRs, enhancers, feature){
 genome <- "hg19"
 # chromosome to represent
 chr <- "chr3"
-# range to plot
+# range to plot (first and last position)
 start <- 37493945
 end <- 37498950
 
 # annotated enhancers from FANTOM5 project
-enh_FANTOM <- DNaseI_FANTOM(gen=genome, chr=chr, start=start, end=end, bedFilePath="/home/rsanz/Documents/FDP/data/human/human_permissive_enhancers_phase_1_and_2.bed",
+enh_FANTOM <- DNaseI_FANTOM(gen=genome, chr=chr, start=start, end=end, bedFilePath="data/enhancers_human.bed",
                            featureDisplay='enhancer', stacking_type="full")
 enh_FANTOM.df <- as.data.frame(enh_FANTOM@range@ranges)
 enhancers <- enh_FANTOM.df
@@ -86,58 +86,10 @@ CpGs <- gmSet@rowRanges
 values(CpGs) <- beta_values
 
 # data frame containing the detected DMRs with the human_methylation.R script 
-DMRs <- read.csv("/home/rsanz/Documents/FDP/supplementary material/human/DMR_list.csv") 
-### looking for DMRs at a specific gene: DMRs <- DMRs %>% filter(overlapping.genes=="ITGA9")
+DMRs <- read.csv("results/human//DMR_list.csv") 
 
 # feature to group the samples (optional)
+## read metadata...
 feature <- metadata$Condition
 
 plot.DMR(genome, chr, start, end, CpGs, DMRs, enhancers, feature)
-
-
-# DMR.list <- data.frame()
-# for(i in 1:length(contrasts)){
-#   # annotating the CpG's for each contrast + finding significant CpG's
-#   myAnnotation <- cpg.annotate(object=beta_values, datatype="array", what="Beta", analysis.type="differential", design=designMat, contrasts=T, 
-#                                cont.matrix=contMat, coef=gsub("_", " - ", as.character(contrasts[i])), arraytype="EPIC", fdr = 0.5)
-#   
-#   if(sum(myAnnotation@ranges@elementMetadata@listData$is.sig)!=0){ # if there are significant CpG's
-#     # test for DMRs
-#     DMR_raw <- dmrcate(myAnnotation, lambda=1000, C=2)
-#     # extract genomic ranges
-#     results.ranges <- extractRanges(DMR_raw)
-#     # saving the results
-#     DMR <- data.frame(Contrast=contrasts[i], results.ranges)
-#     DMR.list <- rbind(DMR.list, DMR)
-#   }
-# }
-# 
-# DMR.list$overlapping.genes
-# DMR.list %>% filter(overlapping.genes=="ITGA9")
-# 
-# DMR.list$overlapping.genes <- unlist(DMR.list$overlapping.genes)
-# # write.csv(DMR.list, "results/human/DMR_list.csv")
-# 
-# ## plotting the DMRs
-# pal <- brewer.pal(8, "Dark2") # palette
-# 
-# ### colour by condition
-# groups <- pal[1:length(unique(metadata$Condition))]
-# names(groups) <- levels(factor(metadata$Condition))
-# cols <- groups[as.character(factor(metadata$Condition))]
-# 
-# ### is needed to convert the data frame into a genomic ranges object first
-# DMR.GR <- makeGRangesFromDataFrame(DMR.list)
-# 
-# DMR.plot(ranges=DMR.GR, dmr=5, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", genome="hg19")
-# 
-DMRs <- DMR.list
-DMRs <- DMR.list %>% filter(overlapping.genes=="ITGA9")
-DMRs <- DMRs[c(1,2,3),]
-
-colSums(table(DMR.list$Contrast, DMR.list$start))==1
-colSums(table(DMR.list$Contrast, DMR.list$end))==1
-
-DMR.list$uniqueid <- paste(DMR.list$seqnames,DMR.list$start, DMR.list$end,sep="_")
-
-table(DMR.list$Contrast, DMR.list$uniqueid)
