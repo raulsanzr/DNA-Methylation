@@ -1,10 +1,7 @@
 #
-# Josep Carreras Leukaemia Research Institute (IJC)                            
-# Authors: Raúl Sanz, Angelika Merkel | Bioinformatics Unit                    
+# Authors: Raúl Sanz, Angelika Merkel                  
 #
 # Description: Workflow to analyze mouse methylation array data from Illumina's Infinium Mouse Methylation BeadChip.
-#
-# Note: minfi has not already implemented functions to analyze mouse methylation data.
 #
 # * files produced with the script R/MouseAnnotation.R
 #
@@ -46,7 +43,7 @@ metadata <- metadata %>% separate(Condition, c("Group", "Time"), " ")
 rgSet <- readidat(path="data/mouse/", manifestfile="data/Infinium_Mouse_Methylation_v1.0_A1_GS_Manifest.csv")
 colnames(rgSet) <- metadata$Sample[which(colnames(rgSet) %in% metadata$EPIC_barcode)]
 
-# reading the manifest file *
+# reading the manifest file*
 manifest <- read.csv("data/manifest_mouse.csv")
 
 # PREPROCESSING
@@ -121,7 +118,7 @@ DMP$mean_diff_96h <- rowMeans(DMP[c("OB39_et_96h", "OB41_et_96h")]) - rowMeans(D
 DMP[order(DMP$mean_diff_16h),]
 
 ## annotating the DMPs
-annNCBIshort <- read.csv("data/annNCBIshort_mouse.csv") # NCBI annotation file *
+annNCBIshort <- read.csv("data/ann_NCBI_mouse.csv") # NCBI annotation file*
 
 ### joining the DMPs with the manifest
 DMP$Name_long  <- row.names(DMP)

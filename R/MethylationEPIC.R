@@ -1,6 +1,5 @@
 #
-# Josep Carreras Leukaemia Research Institute (IJC)                            
-# Authors: Raúl Sanz, Angelika Merkel | Bioinformatics Unit                    
+# Authors: Raúl Sanz, Angelika Merkel                  
 #
 # Description: Workflow to analyze human methylation array data from Illumina's Infinium MethylationEPIC BeadChip.
 #
