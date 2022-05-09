@@ -1,5 +1,7 @@
 ## Description
 
+This repository includes the workflows and additional tools for analyzing methylation data obtained from **Infinium Methylation EPIC BeadChip** and **Infinium Mouse Methylation Beadchip** Illumina arrays with R.
+
 ## Content
 
 - [R/MethylationEPIC.R](https://github.com/raulsanzr/methylation-analysis/blob/main/R/MethylationEPIC.R): Workflow to analyze human methylation array data from the Illumina Infinium Methylation EPIC BeadChip.
@@ -12,5 +14,5 @@
 - [data/enhancers_human.csv](https://github.com/raulsanzr/methylation-analysis/blob/main/data/enhancers_human.csv) and [data/enhancers_mouse.csv](https://github.com/raulsanzr/methylation-analysis/blob/main/data/enhancers_mouse.csv): Files including FANTOM5 enhancers annotated for human and mouse.
 - [data/manifest_mouse.csv](https://github.com/raulsanzr/methylation-analysis/blob/main/data/manifest_mouse.csv): Manifest file for the Mouse Methylation array that maps the probes with their genomic position. It was generated with [MouseAnnotation.R](https://github.com/raulsanzr/methylation-analysis/blob/main/R/MouseAnnotation.R).
 
-- [docs/MethylationEPIC.Rmd](https://github.com/raulsanzr/methylation-analysis/blob/main/docs/MethylationEPIC.Rmd): Markdown version of [MethylationEPIC.R](https://github.com/raulsanzr/methylation-analysis/blob/main/R/MethylationEPIC.R).
+- [docs/MethylationEPIC.md](https://github.com/raulsanzr/methylation-analysis/blob/main/docs/MethylationEPIC.md): Markdown version of [MethylationEPIC.R](https://github.com/raulsanzr/methylation-analysis/blob/main/R/MethylationEPIC.R).
 - [docs/refs/](https://github.com/raulsanzr/methylation-analysis/blob/main/docs/refs): Folder including the referenced figures.
