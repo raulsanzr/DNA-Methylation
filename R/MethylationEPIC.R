@@ -17,6 +17,7 @@
 # install.packages("ggfortify")
 # install.packages("gplots")
 # install.packages("RColorBrewer")
+# devtools::install_github("raulsanzr/methtools")
 
 # REQUIRED PACKAGES
 
@@ -31,6 +32,7 @@ library(ggrepel)
 library(ggfortify)
 library(gplots)
 library(RColorBrewer)
+library(methtools)
 
 # LOADING THE DATA
 
@@ -147,12 +149,10 @@ colnames(DMP_summary) <- gsub(" - ","_", colnames(DMP_summary))
 ## annotating the DMPs
 contrasts <- colnames(contMat)
 ### matching beta values with annotation by the probe names
-annEPICSub <- ann[match(rownames(beta_values),ann$Name), c(1:4,12:19,22:ncol(ann))]
+annEPICSub <- ann.cpg(cpgs=beta_values, array="EPIC", what="short")
 
 DMP.list <- list() # list to store the DMPs
 cg <- list() # list to store the names of significant probes
-
-annEPICSub <- ann[match(rownames(beta_values),ann$Name), c(1:4,12:19,22:ncol(ann))]
 
 DMP.list <- data.frame() # df to store the DMPs
 cg <- list() # list to store the names of significant probes
@@ -228,19 +228,11 @@ for(i in 1:length(contrasts)){
     DMR.list <- rbind(DMR.list, DMR)
   }
 }
-
-DMR.list$overlapping.genes <- unlist(DMR.list$overlapping.genes)
 # write.csv(DMR.list, "results/human/DMR_list.csv")
 
 ## plotting the DMRs
-pal <- brewer.pal(8, "Dark2") # palette
+CpGs <- gmSet@rowRanges
+values(CpGs) <- beta_values
 
-### colour by condition
-groups <- pal[1:length(unique(metadata$Condition))]
-names(groups) <- levels(factor(metadata$Condition))
-cols <- groups[as.character(factor(metadata$Condition))]
+meth.plot(genome="hg19", chr="chr11", start=27015473, end=27015991, sites=CpGs, regions=DMR.list, group=metadata$Condition)
 
-### is needed to convert the data frame into a genomic ranges object first
-DMR.GR <- makeGRangesFromDataFrame(DMR.list)
-
-DMR.plot(ranges=DMR.GR, dmr=5, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", genome="hg19")
