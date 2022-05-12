@@ -16,3 +16,11 @@ This repository includes the workflows and additional tools for analyzing methyl
 
 - [docs/MethylationEPIC.md](https://github.com/raulsanzr/methylation-analysis/blob/main/docs/MethylationEPIC.md): Markdown version of [MethylationEPIC.R](https://github.com/raulsanzr/methylation-analysis/blob/main/R/MethylationEPIC.R).
 - [docs/refs/](https://github.com/raulsanzr/methylation-analysis/blob/main/docs/refs): Folder including the referenced figures.
+
+## Additional information
+
+During the analysis, I developed a package including some functions used in the workflow: [methtools](https://github.com/raulsanzr/methtools).
+
+## Author
+
+Raúl Sanz (2022)
