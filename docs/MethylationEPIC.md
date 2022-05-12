@@ -10,7 +10,7 @@ data, followed by differential methylation analysis to find and annotate
 differentially methylated positions (DMPs) and regions (DMRs).
 
 > **Note**: This document is the markdown version of the
-> [MethylationEPIC.R](https://github.com/raulsanzr/FDP/blob/main/R/MethylationEPIC.R)
+> [MethylationEPIC.R](https://github.com/raulsanzr/methylation-analysis/blob/main/R/MethylationEPIC.R)
 > script.
 
 ## Required packages
@@ -19,7 +19,7 @@ differentially methylated positions (DMPs) and regions (DMRs).
 library(minfi) # BiocManager::install("minfi")
 library(limma) # BiocManager::install("limma")
 library(DMRcate) # BiocManager::install("DMRcate")
-library(maxprobes) # remotes::install_github("markgene/maxprobes")
+library(maxprobes) # devtools::install_github("markgene/maxprobes")
 library(readxl) # install.packages("readxl")
 library(dplyr) # install.packages("dplyr")
 library(ggplot2) # install.packages("ggplot2")
@@ -27,6 +27,7 @@ library(ggrepel) # install.packages("ggrepel")
 library(ggfortify) # install.packages("ggfortify")
 library(gplots) # install.packages("gplots")
 library(RColorBrewer) # install.packages("RColorBrewer")
+library(methtools) # devtools::install_github("raulsanzr/methtools")
 ```
 
 ## Loading the data
@@ -50,8 +51,8 @@ rgSet <- read.metharray.exp("data/human/") # folder where the IDAT files are pla
 
 ### Metadata
 
-The metadata is a file that includes relevant information about the
-samples that will be useful later to group them.
+The metadata includes relevant information about the samples that will
+be useful later to group them.
 
 ``` r
 metadata <- as.data.frame(read_excel("data/human/PIK3CA_samples_SC.xlsx"))
@@ -245,9 +246,11 @@ pca_res <- prcomp(t(beta_top100), scale=T, center=T) # ! the matrix needs to tra
 
 ``` r
 autoplot(pca_res, x=1, y=2,data=metadata, colour="Condition")+
-  geom_text_repel(aes(label=Sample, color=Condition),hjust=-0.1, vjust=0, show.legend=F, size=3.5)+
+  geom_text_repel(aes(label=Sample, color=Condition),hjust=-0.1, vjust=0, show.legend=F, size=4)+
   xlim(c(-0.5,0.3)) +
-  theme_bw()
+  scale_color_brewer(palette="Set2")+ 
+  theme_bw()+
+  ggtitle("PCA by condition")
 ```
 
 ![](refs/PCA_Condition.png)<!-- -->
@@ -311,7 +314,7 @@ they are located in the genome.
 contrasts <- colnames(contMat)
 
 # matching beta values with annotation by the probe names
-annEPICSub <- ann[match(rownames(beta_values),ann$Name), c(1:4,12:19,22:ncol(ann))]
+annEPICSub <- ann.cpg(cpgs=beta_values, array="EPIC", what="short")
 
 DMP.list <- data.frame() # df to store the DMPs
 cg <- list() # list to store the names of significant probes
@@ -404,7 +407,7 @@ statistics that support the finding.
 DMR.list <- data.frame()
 for(i in 1:length(contrasts)){
   # annotating the CpG's for each contrast + finding significant CpG's
-  myAnnotation <- cpg.annotate(object=beta_values, datatype="array", what="Beta", contrasts=T, 
+  myAnnotation <- cpg.annotate(object=beta_values, datatype="array", what="Beta",contrasts=T,  
                                design=designMat, cont.matrix=contMat, analysis.type="differential",
                                coef=gsub("_", " - ", as.character(contrasts[i])), arraytype="EPIC")
   
@@ -435,29 +438,16 @@ head(DMR.list[,c(2:7,14)], 5)
 
 #### Plotting DMRs
 
-This package also includes the function `DMR.plot` to plot the found
-DMRs based on `Gviz` representations by tracks.
-
 ``` r
-pal <- brewer.pal(8, "Dark2") # palette
+CpGs <- gmSet@rowRanges
+values(CpGs) <- beta_values
 
-# to colour by mutation (condition)
-groups <- pal[1:length(unique(metadata$Condition))]
-names(groups) <- levels(factor(metadata$Condition))
-cols <- groups[as.character(factor(metadata$Condition))]
-
-# is needed to convert the data frame into a genomic ranges object
-DMR.GR <- makeGRangesFromDataFrame(DMR.list)
-
-DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arraytype="EPIC", 
-         genome="hg19")
+meth.plot(genome="hg19", chr="chr11", start=27015473, end=27015991, sites=CpGs, regions=DMR.list, group=metadata$Condition)
 ```
 
 ![](refs/DMR_1.png)<!-- -->
 
-> **Note**: Other desired regions of the genome can be plotted using the
-> [plotDMR.R](https://github.com/raulsanzr/FDP/blob/main/R/plotDMR.R)
-> script.
+> **Note**: Plot produced with [methtools](https://github.com/raulsanzr/methtools).
 
 ## Session information
 
@@ -488,38 +478,39 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ##  [5] dbplyr_2.1.1                                       
     ##  [6] IlluminaHumanMethylationEPICanno.ilm10b4.hg19_0.6.0
     ##  [7] IlluminaHumanMethylationEPICmanifest_0.3.0         
-    ##  [8] RColorBrewer_1.1-2                                 
-    ##  [9] gplots_3.1.1                                       
-    ## [10] ggfortify_0.4.14                                   
-    ## [11] ggrepel_0.9.1                                      
-    ## [12] ggplot2_3.3.5                                      
-    ## [13] dplyr_1.0.8                                        
-    ## [14] readxl_1.3.1                                       
-    ## [15] maxprobes_0.0.2                                    
-    ## [16] DMRcate_2.8.3                                      
-    ## [17] limma_3.50.1                                       
-    ## [18] minfi_1.40.0                                       
-    ## [19] bumphunter_1.36.0                                  
-    ## [20] locfit_1.5-9.5                                     
-    ## [21] iterators_1.0.14                                   
-    ## [22] foreach_1.5.2                                      
-    ## [23] Biostrings_2.62.0                                  
-    ## [24] XVector_0.34.0                                     
-    ## [25] SummarizedExperiment_1.24.0                        
-    ## [26] Biobase_2.54.0                                     
-    ## [27] MatrixGenerics_1.6.0                               
-    ## [28] matrixStats_0.61.0                                 
-    ## [29] GenomicRanges_1.46.1                               
-    ## [30] GenomeInfoDb_1.30.1                                
-    ## [31] IRanges_2.28.0                                     
-    ## [32] S4Vectors_0.32.3                                   
-    ## [33] BiocGenerics_0.40.0                                
+    ##  [8] methtools_0.0.2.0                                  
+    ##  [9] RColorBrewer_1.1-3                                 
+    ## [10] gplots_3.1.3                                       
+    ## [11] ggfortify_0.4.14                                   
+    ## [12] ggrepel_0.9.1                                      
+    ## [13] ggplot2_3.3.6                                      
+    ## [14] dplyr_1.0.9                                        
+    ## [15] readxl_1.4.0                                       
+    ## [16] maxprobes_0.0.2                                    
+    ## [17] DMRcate_2.8.3                                      
+    ## [18] limma_3.50.3                                       
+    ## [19] minfi_1.40.0                                       
+    ## [20] bumphunter_1.36.0                                  
+    ## [21] locfit_1.5-9.5                                     
+    ## [22] iterators_1.0.14                                   
+    ## [23] foreach_1.5.2                                      
+    ## [24] Biostrings_2.62.0                                  
+    ## [25] XVector_0.34.0                                     
+    ## [26] SummarizedExperiment_1.24.0                        
+    ## [27] Biobase_2.54.0                                     
+    ## [28] MatrixGenerics_1.6.0                               
+    ## [29] matrixStats_0.62.0                                 
+    ## [30] GenomicRanges_1.46.1                               
+    ## [31] GenomeInfoDb_1.30.1                                
+    ## [32] IRanges_2.28.0                                     
+    ## [33] S4Vectors_0.32.4                                   
+    ## [34] BiocGenerics_0.40.0                                
     ## 
     ## loaded via a namespace (and not attached):
     ##   [1] utf8_1.2.2                                        
     ##   [2] R.utils_2.11.0                                    
     ##   [3] tidyselect_1.1.2                                  
-    ##   [4] RSQLite_2.2.10                                    
+    ##   [4] RSQLite_2.2.14                                    
     ##   [5] AnnotationDbi_1.56.2                              
     ##   [6] htmlwidgets_1.5.4                                 
     ##   [7] grid_4.1.2                                        
@@ -532,16 +523,16 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ##  [14] colorspace_2.0-3                                  
     ##  [15] filelock_1.0.2                                    
     ##  [16] highr_0.9                                         
-    ##  [17] knitr_1.37                                        
+    ##  [17] knitr_1.39                                        
     ##  [18] rstudioapi_0.13                                   
     ##  [19] labeling_0.4.2                                    
     ##  [20] GenomeInfoDbData_1.2.7                            
     ##  [21] farver_2.1.0                                      
     ##  [22] bit64_4.0.5                                       
-    ##  [23] rhdf5_2.38.0                                      
-    ##  [24] vctrs_0.3.8                                       
+    ##  [23] rhdf5_2.38.1                                      
+    ##  [24] vctrs_0.4.1                                       
     ##  [25] generics_0.1.2                                    
-    ##  [26] xfun_0.30                                         
+    ##  [26] xfun_0.31                                         
     ##  [27] biovizBase_1.42.0                                 
     ##  [28] R6_2.5.1                                          
     ##  [29] illuminaio_0.36.0                                 
@@ -549,17 +540,17 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ##  [31] bitops_1.0-7                                      
     ##  [32] rhdf5filters_1.6.0                                
     ##  [33] cachem_1.0.6                                      
-    ##  [34] reshape_0.8.8                                     
+    ##  [34] reshape_0.8.9                                     
     ##  [35] DelayedArray_0.20.0                               
     ##  [36] assertthat_0.2.1                                  
     ##  [37] IlluminaHumanMethylation450kanno.ilmn12.hg19_0.6.0
     ##  [38] promises_1.2.0.1                                  
     ##  [39] BiocIO_1.4.0                                      
-    ##  [40] scales_1.1.1                                      
+    ##  [40] scales_1.2.0                                      
     ##  [41] bsseq_1.30.0                                      
     ##  [42] nnet_7.3-17                                       
     ##  [43] gtable_0.3.0                                      
-    ##  [44] ensembldb_2.18.3                                  
+    ##  [44] ensembldb_2.18.4                                  
     ##  [45] rlang_1.0.2                                       
     ##  [46] genefilter_1.76.0                                 
     ##  [47] splines_4.1.2                                     
@@ -567,9 +558,9 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ##  [49] lazyeval_0.2.2                                    
     ##  [50] DSS_2.42.0                                        
     ##  [51] GEOquery_2.62.2                                   
-    ##  [52] dichromat_2.0-0                                   
-    ##  [53] checkmate_2.0.0                                   
-    ##  [54] BiocManager_1.30.16                               
+    ##  [52] dichromat_2.0-0.1                                 
+    ##  [53] checkmate_2.1.0                                   
+    ##  [54] BiocManager_1.30.17                               
     ##  [55] yaml_2.3.5                                        
     ##  [56] GenomicFeatures_1.46.5                            
     ##  [57] backports_1.4.1                                   
@@ -579,8 +570,8 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ##  [61] nor1mix_1.3-0                                     
     ##  [62] ellipsis_0.3.2                                    
     ##  [63] siggenes_1.68.0                                   
-    ##  [64] Rcpp_1.0.8                                        
-    ##  [65] plyr_1.8.6                                        
+    ##  [64] Rcpp_1.0.8.3                                      
+    ##  [65] plyr_1.8.7                                        
     ##  [66] base64enc_0.1-3                                   
     ##  [67] sparseMatrixStats_1.6.0                           
     ##  [68] progress_1.2.2                                    
@@ -591,7 +582,7 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ##  [73] rpart_4.1-15                                      
     ##  [74] openssl_2.0.0                                     
     ##  [75] cluster_2.1.2                                     
-    ##  [76] magrittr_2.0.2                                    
+    ##  [76] magrittr_2.0.3                                    
     ##  [77] data.table_1.14.2                                 
     ##  [78] ProtGenerics_1.26.0                               
     ##  [79] missMethyl_1.28.0                                 
@@ -605,13 +596,13 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ##  [87] gridExtra_2.3                                     
     ##  [88] compiler_4.1.2                                    
     ##  [89] biomaRt_2.50.3                                    
-    ##  [90] tibble_3.1.6                                      
+    ##  [90] tibble_3.1.7                                      
     ##  [91] KernSmooth_2.23-20                                
-    ##  [92] crayon_1.5.0                                      
+    ##  [92] crayon_1.5.1                                      
     ##  [93] R.oo_1.24.0                                       
     ##  [94] htmltools_0.5.2                                   
     ##  [95] later_1.3.0                                       
-    ##  [96] tzdb_0.2.0                                        
+    ##  [96] tzdb_0.3.0                                        
     ##  [97] Formula_1.2-4                                     
     ##  [98] tidyr_1.2.0                                       
     ##  [99] DBI_1.1.2                                         
@@ -620,56 +611,57 @@ DMR.plot(ranges=DMR.GR, dmr=1, CpGs=beta_values, phen.col=cols, what="Beta", arr
     ## [102] Matrix_1.4-0                                      
     ## [103] readr_2.1.2                                       
     ## [104] permute_0.9-7                                     
-    ## [105] cli_3.2.0                                         
+    ## [105] cli_3.3.0                                         
     ## [106] quadprog_1.5-8                                    
     ## [107] R.methodsS3_1.8.1                                 
     ## [108] Gviz_1.38.2                                       
-    ## [109] pkgconfig_2.0.3                                   
-    ## [110] GenomicAlignments_1.30.0                          
-    ## [111] foreign_0.8-82                                    
-    ## [112] xml2_1.3.3                                        
-    ## [113] annotate_1.72.0                                   
-    ## [114] rngtools_1.5.2                                    
-    ## [115] multtest_2.50.0                                   
-    ## [116] beanplot_1.2                                      
-    ## [117] doRNG_1.8.2                                       
-    ## [118] scrime_1.3.5                                      
-    ## [119] stringr_1.4.0                                     
-    ## [120] VariantAnnotation_1.40.0                          
-    ## [121] digest_0.6.29                                     
-    ## [122] cellranger_1.1.0                                  
-    ## [123] rmarkdown_2.12                                    
-    ## [124] base64_2.0                                        
-    ## [125] htmlTable_2.4.0                                   
-    ## [126] edgeR_3.36.0                                      
-    ## [127] DelayedMatrixStats_1.16.0                         
-    ## [128] restfulr_0.0.13                                   
-    ## [129] curl_4.3.2                                        
-    ## [130] shiny_1.7.1                                       
-    ## [131] Rsamtools_2.10.0                                  
-    ## [132] gtools_3.9.2                                      
-    ## [133] rjson_0.2.21                                      
-    ## [134] lifecycle_1.0.1                                   
-    ## [135] nlme_3.1-155                                      
-    ## [136] Rhdf5lib_1.16.0                                   
-    ## [137] askpass_1.1                                       
-    ## [138] BSgenome_1.62.0                                   
-    ## [139] fansi_1.0.2                                       
-    ## [140] pillar_1.7.0                                      
-    ## [141] lattice_0.20-45                                   
-    ## [142] KEGGREST_1.34.0                                   
-    ## [143] fastmap_1.1.0                                     
-    ## [144] httr_1.4.2                                        
-    ## [145] survival_3.2-13                                   
-    ## [146] interactiveDisplayBase_1.32.0                     
-    ## [147] glue_1.6.2                                        
-    ## [148] png_0.1-7                                         
-    ## [149] BiocVersion_3.14.0                                
-    ## [150] bit_4.0.4                                         
-    ## [151] stringi_1.7.6                                     
-    ## [152] HDF5Array_1.22.1                                  
-    ## [153] blob_1.2.2                                        
-    ## [154] org.Hs.eg.db_3.14.0                               
-    ## [155] caTools_1.18.2                                    
-    ## [156] latticeExtra_0.6-29                               
-    ## [157] memoise_2.0.1
+    ## [109] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2           
+    ## [110] pkgconfig_2.0.3                                   
+    ## [111] GenomicAlignments_1.30.0                          
+    ## [112] foreign_0.8-82                                    
+    ## [113] xml2_1.3.3                                        
+    ## [114] annotate_1.72.0                                   
+    ## [115] rngtools_1.5.2                                    
+    ## [116] multtest_2.50.0                                   
+    ## [117] beanplot_1.3.1                                    
+    ## [118] doRNG_1.8.2                                       
+    ## [119] scrime_1.3.5                                      
+    ## [120] stringr_1.4.0                                     
+    ## [121] VariantAnnotation_1.40.0                          
+    ## [122] digest_0.6.29                                     
+    ## [123] cellranger_1.1.0                                  
+    ## [124] rmarkdown_2.14                                    
+    ## [125] base64_2.0                                        
+    ## [126] htmlTable_2.4.0                                   
+    ## [127] edgeR_3.36.0                                      
+    ## [128] DelayedMatrixStats_1.16.0                         
+    ## [129] restfulr_0.0.13                                   
+    ## [130] curl_4.3.2                                        
+    ## [131] shiny_1.7.1                                       
+    ## [132] Rsamtools_2.10.0                                  
+    ## [133] gtools_3.9.2                                      
+    ## [134] rjson_0.2.21                                      
+    ## [135] lifecycle_1.0.1                                   
+    ## [136] nlme_3.1-155                                      
+    ## [137] Rhdf5lib_1.16.0                                   
+    ## [138] askpass_1.1                                       
+    ## [139] BSgenome_1.62.0                                   
+    ## [140] fansi_1.0.3                                       
+    ## [141] pillar_1.7.0                                      
+    ## [142] lattice_0.20-45                                   
+    ## [143] KEGGREST_1.34.0                                   
+    ## [144] fastmap_1.1.0                                     
+    ## [145] httr_1.4.3                                        
+    ## [146] survival_3.2-13                                   
+    ## [147] interactiveDisplayBase_1.32.0                     
+    ## [148] glue_1.6.2                                        
+    ## [149] png_0.1-7                                         
+    ## [150] BiocVersion_3.14.0                                
+    ## [151] bit_4.0.4                                         
+    ## [152] stringi_1.7.6                                     
+    ## [153] HDF5Array_1.22.1                                  
+    ## [154] blob_1.2.3                                        
+    ## [155] org.Hs.eg.db_3.14.0                               
+    ## [156] caTools_1.18.2                                    
+    ## [157] latticeExtra_0.6-29                               
+    ## [158] memoise_2.0.1
