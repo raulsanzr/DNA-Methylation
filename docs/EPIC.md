@@ -10,7 +10,7 @@ data, followed by differential methylation analysis to find and annotate
 differentially methylated positions (DMPs) and regions (DMRs).
 
 > **Note**: This document is the markdown version of the
-> [MethylationEPIC.R](https://github.com/raulsanzr/methylation-analysis/blob/main/R/MethylationEPIC.R)
+> [EPIC.R](https://github.com/raulsanzr/methylation/blob/main/R/EPIC.R)
 > script.
 
 ## Required packages
