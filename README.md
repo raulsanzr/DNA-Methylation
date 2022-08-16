@@ -8,6 +8,9 @@ This repository includes the pipelines for analyzing methylation data obtained f
 - [R/mouse.R](https://github.com/raulsanzr/methylation/blob/main/R/mouse.R): Pipeline to analyze human methylation array data from Infinium Mouse Methylation array.
 - [R/mouse_ann.R](https://github.com/raulsanzr/methylation/blob/main/R/mouse_ann.R): Script to generate and format the manifest and the annotation files for the Mouse Methylation array. Files are stored in [data/](https://github.com/raulsanzr/methylation/blob/main/data/) folder.
 
+
+- [docs/](https://github.com/raulsanzr/methylation/blob/main/docs): Folder containing the pipeline's markdown version.
+
 ## Author
 
-Raul Sanz (2022)
+Raúl Sanz (2022)
