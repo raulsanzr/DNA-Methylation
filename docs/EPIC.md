@@ -132,7 +132,7 @@ to analyze.
     correction.
 -   `preprocessFunnorm`: Functional normalization.
 
-> **Note**: Find more documentation about the different preprocessing
+> Find more documentation about the different preprocessing
 > functions
 > [here](https://www.bioconductor.org/help/course-materials/2015/BioC2015/methylation450k.html#preprocessing-and-normalization).
 
@@ -292,7 +292,7 @@ fit2 <- eBayes(fit2)
 summary(decideTests(fit2, p.value=0.01))
 ```
 
-> **Note**: DMPs can be either hypomethylated (loss of methylation) or
+> DMPs can be either hypomethylated (loss of methylation) or
 > hypermethylated (gain of methylation) sites.
 
 |                   | Hypomethylated | Hypermethylated | TOTAL |
@@ -447,7 +447,7 @@ methplot(genome="hg19", chr="chr11", start=27015473, end=27015991, sites=CpGs, r
 
 ![](refs/DMR_1.png)<!-- -->
 
-> **Note**: Plot produced with [methplot](https://github.com/raulsanzr/methtplot).
+> Plot produced with [methplot](https://github.com/raulsanzr/cpgplot).
 
 ## Session information
 
