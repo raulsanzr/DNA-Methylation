@@ -9,7 +9,7 @@ array data using R and mainly three Bioconductor packages: `minfi`,
 data, followed by differential methylation analysis to find and annotate
 differentially methylated positions (DMPs) and regions (DMRs).
 
-> **Note**: This document is the markdown version of the
+> This document is the markdown version of the
 > [EPIC.R](https://github.com/raulsanzr/methylation/blob/main/R/EPIC.R)
 > script.
 
