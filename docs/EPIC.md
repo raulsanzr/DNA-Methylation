@@ -442,12 +442,12 @@ head(DMR.list[,c(2:7,14)], 5)
 CpGs <- gmSet@rowRanges
 values(CpGs) <- beta_values
 
-methplot(genome="hg19", chr="chr11", start=27015473, end=27015991, sites=CpGs, regions=DMR.list, group=metadata$Condition)
+cpgplot(genome="hg19", chr="chr11", start=27015473, end=27015991, sites=CpGs, regions=DMR.list, group=metadata$Condition)
 ```
 
 ![](refs/DMR_1.png)<!-- -->
 
-> Plot produced with [methplot](https://github.com/raulsanzr/cpgplot).
+> Plot produced with [cpgplot](https://github.com/raulsanzr/cpgplot).
 
 ## Session information
 
