@@ -114,7 +114,7 @@ ggplot(mean_p, aes(x=Sample, y=p_values, fill=p_values))+
         axis.text.x=element_text(angle=30, vjust=1, hjust=1))
 ```
 
-![](refs/Detection_p.png)<!-- -->
+![](figures/Detection_p.png)<!-- -->
 
 ## Preprocessing
 
@@ -253,7 +253,7 @@ autoplot(pca_res, x=1, y=2,data=metadata, colour="Condition")+
   ggtitle("PCA by condition")
 ```
 
-![](refs/PCA_Condition.png)<!-- -->
+![](figures/PCA_Condition.png)<!-- -->
 
 ## Differential methylation analysis
 
@@ -356,7 +356,7 @@ ggplot(DMP_annCGI, aes(Contrast, fill=Relation_to_Island))+
   xlab("")
 ```
 
-![](refs/DMP_CGI.png)<!-- -->
+![](figures/DMP_CGI.png)<!-- -->
 
 #### DMPs by gene elements
 
@@ -374,7 +374,7 @@ ggplot(DMP_Gene_Group, aes(Contrast, fill=UCSC_RefGene_Group_short))+
   labs(fill="UCSC_RefGene")
 ```
 
-![](refs/DMP_gene.png)<!-- -->
+![](figures/DMP_gene.png)<!-- -->
 
 #### Heatmap of DMPs
 
@@ -388,7 +388,7 @@ heatmap.2(as.matrix(t(unique(DMP_beta))), trace="none", density.inf="none",
           margins=c(7,10), col=colors, cexRow = 1, lwid = c(5,15), lhei = c(5,15))
 ```
 
-![](refs/DMP_heatmap.png)<!-- -->
+![](figures/DMP_heatmap.png)<!-- -->
 
 ### Differentially Methylated Regions
 
@@ -445,7 +445,7 @@ values(CpGs) <- beta_values
 cpgplot(genome="hg19", chr="chr11", start=27015473, end=27015991, sites=CpGs, regions=DMR.list, group=metadata$Condition)
 ```
 
-![](refs/DMR_1.png)<!-- -->
+![](figures/DMR_1.png)<!-- -->
 
 > Plot produced with [cpgplot](https://github.com/raulsanzr/cpgplot).
 
