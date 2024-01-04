@@ -12,7 +12,7 @@ The `human_epic_analysis.R` script is designed to analyze DNA methylation data f
 
 The `mouse_analysis.R` script is tailored for the analysis of DNA methylation data from mouse methylation array experiments.
 
-## Annotation Files
+### Annotation Files
 
 This repository includes annotation files created to analyze the mouse methylation data. These files consist of the manifest file and two additional files providing essential information about genomic features. Find all these files in the `annotation_files` directory.
 
