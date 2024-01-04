@@ -18,7 +18,7 @@ library(bumphunter) # BiocManager::install("bumphunter")
 # LOADING THE DATA
 
 # reading the metadata file
-metadata <- as.data.frame(read_excel("data/mouse/PIK3Ca_mouse_samples.xlsx"))
+metadata <- as.data.frame(read_excel("data/PIK3Ca_mouse_samples.xlsx"))
 names(metadata) <- c("Sample", "Organism", "Tissue", "Type", "Condition", "Preservation", "DNA_quantity", 
                      "EPIC_ID", "EPIC_position", "EPIC_barcode")
 
@@ -28,7 +28,7 @@ metadata$Observation <- substr(metadata$Sample, 0, 4)
 metadata <- metadata %>% separate(Condition, c("Group", "Time"), " ")
 
 # reading all the DNA methylation array files (idat) from a folder
-rgSet <- readidat(path="data/mouse/", manifestfile="data/Infinium_Mouse_Methylation_v1.0_A1_GS_Manifest.csv")
+rgSet <- readidat(path="data/mouse/", manifestfile="annotation_files/Infinium_Mouse_Methylation_v1.0_A1_GS_Manifest.csv")
 colnames(rgSet) <- metadata$Sample[which(colnames(rgSet) %in% metadata$EPIC_barcode)]
 
 # reading the manifest file*
